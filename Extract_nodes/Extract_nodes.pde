@@ -5,6 +5,7 @@ void setup(){
   size(500,500);
   M1_0 = loadImage("M1_0.png");
   writer = createWriter("pointData.txt");
+  
   image(M1_0,0,0);
   
 }
@@ -12,7 +13,7 @@ void setup(){
 
 void draw(){
   
-  extractNodes(100,5,5);
+  extractNodes(150,20,20);
   
 }
 
@@ -24,7 +25,7 @@ boolean extractNodes(int numberOfNodesToExtract, int dx, int dy){
   if(lastCord[0]>500){lastCord[0]=0; lastCord[1]+=dy;}
   if(lastCord[1]>500){ if(!allIsExtracted){println("finished, number of nodes=",nodeCounter, "estimated mesh memory requirement =",pow(nodeCounter,2)*64.0/pow(1023,2), "MB");allIsExtracted=true; writer.flush(); writer.close();}  return false;}
   
-  strokeWeight(3);
+  strokeWeight(2);
   
   
   for(int i=0;i<numberOfNodesToExtract;i++){    
@@ -39,25 +40,25 @@ boolean extractNodes(int numberOfNodesToExtract, int dx, int dy){
       if(r>245 && g <10 && b < 10){//red
       stroke(255);
       point(lastCord[0],lastCord[1]); 
-      writer.println(nodeCounter+",RESISTANCE_LOW,"+lastCord[0]+","+lastCord[1]+",-1"+",-2"+",-2"+",-2"+",-2"+",TYPE_VOLTAGE;");
+      writer.print(nodeCounter+",RESISTANCE_LOW,"+lastCord[0]+","+lastCord[1]+",-1"+",-2"+",-2"+",-2"+",-2"+",TYPE_VOLTAGE;");
       nodeCounter++;
       }  
       else if(r<10 && g <10 && b > 240){//blue
       stroke(255);
       point(lastCord[0],lastCord[1]); 
-      writer.println(nodeCounter+",RESISTANCE_LOW,"+lastCord[0]+","+lastCord[1]+",-1"+",-2"+",-2"+",-2"+",-2"+",TYPE_GROUND;");
+      writer.print(nodeCounter+",RESISTANCE_LOW,"+lastCord[0]+","+lastCord[1]+",-1"+",-2"+",-2"+",-2"+",-2"+",TYPE_GROUND;");
       nodeCounter++;
       } 
       else if(r+g+b>735){//white
       stroke(0,255,0);
       point(lastCord[0],lastCord[1]); 
-      writer.println(nodeCounter+",RESISTANCE_HIGH,"+lastCord[0]+","+lastCord[1]+",-2"+",-2"+",-2"+",-2"+",-2"+",TYPE_ORDINARY;");
+      writer.print(nodeCounter+",RESISTANCE_HIGH,"+lastCord[0]+","+lastCord[1]+",-2"+",-2"+",-2"+",-2"+",-2"+",TYPE_ORDINARY;");
       nodeCounter++;
    
       } else if(r+g+b <15){//black
       stroke(125,125,125);
       point(lastCord[0],lastCord[1]);  
-      writer.println(nodeCounter+",RESISTANCE_LOW,"+lastCord[0]+","+lastCord[1]+",-2"+",-2"+",-2"+",-2"+",-2"+",TYPE_ORDINARY;");
+      writer.print(nodeCounter+",RESISTANCE_LOW,"+lastCord[0]+","+lastCord[1]+",-2"+",-2"+",-2"+",-2"+",-2"+",TYPE_ORDINARY;");
       nodeCounter++;      
       }               
       

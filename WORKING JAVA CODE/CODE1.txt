@@ -1,0 +1,284 @@
+import java.io.*; 
+
+public class MAIN {
+	
+	////UI	
+	
+	///
+	static float RESISTANCE_LOW=0.001f;
+	static float RESISTANCE_HIGH=1;
+	static float VOLTAGE_VALUE=5;
+	static int DX=150;
+	static int DY=150;
+	FileReader fr;
+	
+	public static void main(String[] args) throws IOException  {
+		form_node_matrix_from_text();
+		form_matrix_to_solve();
+		print_matrix_to_solve();
+		
+		get_row_reduced_echolon();
+		print_matrix_to_solve();
+		
+		form_node_vector();
+		print_node_vector();
+		
+		
+	}
+	
+	static int matrixSize[]= {0,0};
+	static String node_matrix[][]= new String[1][10];// [n]{index,resistance,cord,node volt,currents,type}
+	static float node_vector[];//e1,e2,e3,...,en  -1 if null
+	static float matrix_to_solve[][];//n*n
+	static float matrix_to_solve_RHS[];//
+		
+	
+	static boolean isPassiveRow[];
+	static int ColumnToClean=0;	
+	static void cleanOneColumn() {
+		
+		int i=0;
+		if(ColumnToClean>=matrixSize[1])return;//if all the columns are cleaned ->return
+		
+		while(true) {// if can not find nonzero row-> change column
+			
+			if(i>=matrixSize[0]) {//all rows are zero-> change column
+				System.out.println("COLUMN IS REDUCED -> c:"+ColumnToClean+" using r:none");
+				ColumnToClean++;
+				return;}
+			if(matrix_to_solve[i][ColumnToClean]!=0 && !isPassiveRow[i]) {//Found a nonzero row
+				System.out.println("COLUMN IS REDUCED -> c:"+ColumnToClean+" using r:"+i+" which has value of "+matrix_to_solve[i][ColumnToClean]);
+				isPassiveRow[i]=true;
+				break;
+			}
+			i++;//maybe other row 
+		}
+		
+		//------------------------------------		
+		
+		for(int r=0;r<matrixSize[0];r++) {		
+			if(r==i)continue;
+			float multiplier = -(matrix_to_solve[r][ColumnToClean]/matrix_to_solve[i][ColumnToClean]);
+			for(int c=0;c<matrixSize[1];c++) {
+				matrix_to_solve[r][c] +=  multiplier*matrix_to_solve[i][c];
+			}
+			matrix_to_solve[r][ColumnToClean]=0;
+			matrix_to_solve_RHS[r] +=  multiplier*matrix_to_solve_RHS[i];
+		}
+		
+		ColumnToClean++;//cleaned this column -> go with upcoming one		
+	}
+	static void get_row_reduced_echolon() {
+		for(int i=0;i<matrixSize[1];i++) {
+			cleanOneColumn();
+			print_matrix_to_solve();
+		}
+	}
+    static void form_node_matrix_from_text() throws IOException {
+		FileReader fr= new FileReader("D:\\GITHUB\\FAE-reluctance\\Extract_nodes\\pointData.txt");
+		int numberOfNodes=0;
+		int c;
+		while(true) {
+			c=fr.read();
+			if(c==-1)break;
+			if(c==';')numberOfNodes++;
+		}		
+		node_matrix= new String[numberOfNodes][10];
+		matrix_to_solve= new float[numberOfNodes][numberOfNodes];
+		matrix_to_solve_RHS= new float[numberOfNodes];
+		node_vector = new float[numberOfNodes];
+		for(int i=0;i<numberOfNodes;i++)node_vector[i]=-1;
+		isPassiveRow= new boolean[numberOfNodes];	
+		matrixSize[0]=numberOfNodes;
+		matrixSize[1]=numberOfNodes;
+		//-------------
+		fr= new FileReader("D:\\GITHUB\\FAE-reluctance\\Extract_nodes\\pointData.txt");
+		
+		int data_counter=0;
+		int node_counter=0;
+		while(true) {
+			
+			c=fr.read();
+			if(c==-1)break;
+			else if(c==';') {
+				data_counter=0;				
+				node_counter++;
+				}
+			else if(c==',') data_counter++;
+			else {			
+				if(node_matrix[node_counter][data_counter]==null)node_matrix[node_counter][data_counter]="";
+				node_matrix[node_counter][data_counter]+=(char)c;
+			}
+			
+			
+		}	
+		
+		
+	}
+	static String[] get_node_data_STRING_ARRAY(int no) {
+		String return_string[]= new String[10];
+	    for(int i=0;i<10;i++) {
+	    	return_string[i]=node_matrix[no][i];
+	    }
+		
+		return return_string;		
+	}
+	static float[] calculate_single_branch_equation(int no,int i) {
+		//RETURNS -> index of the main node ; coefficient of main node (matrix to solve);index of the other node ; coefficient of other node ; RHS 
+		float return_float_array[] = {0,0,0,0,0};
+		//formulation-> (no-i)/R -> no/R   -  i/R 
+		String data[]=get_node_data_STRING_ARRAY(no);		
+		String data2[]=get_node_data_STRING_ARRAY(i);	
+		//-- get resistance
+		float R=0;
+		if(data[1].equals("RESISTANCE_LOW")) {
+			R+=RESISTANCE_LOW;
+		}else R+=RESISTANCE_HIGH;		
+		if(data2[1].equals("RESISTANCE_LOW")) {
+			R+=RESISTANCE_LOW;
+		}else R+=RESISTANCE_HIGH;	
+		System.out.println(R);
+		//get equation for node "no"
+		//if not ordinary put equation to RHS
+		if(data[9].equals("TYPE_GROUND")) {
+			return_float_array[0]=no;
+			return_float_array[1]=0;
+			return_float_array[4]-=0;
+		}else if(data[9].contentEquals("TYPE_VOTLAGE")) {
+			return_float_array[0]=no;
+			return_float_array[1]=0;
+			return_float_array[4]-=VOLTAGE_VALUE/R;
+		}else if(data[9].contentEquals("TYPE_ORDINARY")) {
+			return_float_array[0]=no;
+			return_float_array[1]+=1/R;			
+		}
+		//get equation for node "i"
+				//if not ordinary put equation to RHS
+				if(data2[9].equals("TYPE_GROUND")) {
+					return_float_array[2]=i;
+					return_float_array[3]=0;
+					return_float_array[4]=0;
+				}else if(data2[9].equals("TYPE_VOLTAGE")) {
+					return_float_array[2]=i;
+					return_float_array[3]=0;
+					return_float_array[4]=VOLTAGE_VALUE/R;
+				}else if(data2[9].equals("TYPE_ORDINARY")) {
+					return_float_array[2]=i;
+					return_float_array[3]-=1/R;
+					
+				}		
+		
+		
+		return return_float_array;
+	}
+	static void form_node_equation(int no,int dx,int dy) {
+		float right_hand_side=0;	
+		
+		String data[]=get_node_data_STRING_ARRAY(no);
+		
+		int cordinates[]= {Integer.valueOf(data[2]),Integer.valueOf(data[3])};
+		if(data[9].equals("TYPE_VOLTAGE")){
+			node_vector[no]=VOLTAGE_VALUE;			
+			return;
+		}else if(data[9].equals("TYPE_GROUND")){
+			node_vector[no]=0;		
+			return;
+		}
+		//check all near nodes		
+		for(int i=0;i<matrixSize[1];i++) {
+			if(i==no)continue;
+			
+			String data2[]=get_node_data_STRING_ARRAY(i);
+			int other_node_cordinates[]= {Integer.valueOf(data2[2]),Integer.valueOf(data2[3])};
+			
+			if( 
+			(Math.abs(other_node_cordinates[0]-cordinates[0])==dx && Math.abs(other_node_cordinates[1]-cordinates[1])==0)
+			|| (Math.abs(other_node_cordinates[1]-cordinates[1])==dy && Math.abs(other_node_cordinates[0]-cordinates[0])==0)
+			) {
+				// should write an equation related to node "no" and node "i"
+				System.out.println( "main node:"+no+" "+cordinates[0]+","+cordinates[1]+" other node: "+i+" "+other_node_cordinates[0]+","+other_node_cordinates[1]);
+				float equations[]=  calculate_single_branch_equation(no,i);				
+				matrix_to_solve[no][(int)equations[0]]+=equations[1];
+				matrix_to_solve[no][(int)equations[2]]+=equations[3];
+				matrix_to_solve_RHS[no]+=equations[4];
+				
+			}
+			
+			
+		}
+		
+	}
+	static void form_matrix_to_solve() {
+		for(int n=0;n<matrixSize[1];n++) {
+			form_node_equation(n,DX,DY);
+		}
+	}
+	static void form_node_vector() {
+		for(int i=0;i<matrixSize[1];i++) {//scan each row of the solution matrix
+			int j;
+			for(j=0;j<matrixSize[1];j++) {//scan every columns of a single row
+				if(matrix_to_solve[i][j]>0.00000001f)break;
+			}
+			if(j!=matrixSize[1]) {//if all columns are not zero (defined voltage)
+				node_vector[j]=matrix_to_solve_RHS[i]/matrix_to_solve[i][j];
+			}
+		}
+	}
+	//UI
+	static void print_node_vector() {
+		System.out.print("\nnode_vector;\n");
+		for(int i=0;i<matrixSize[1];i++) {
+			System.out.println("node"+i+": "+node_vector[i]+ " VOLT");
+		}
+	}
+	static void print_row(int row) {
+		System.out.print("ROW:"+row+"->");
+		for(int i=0;i<matrixSize[1];i++) {
+			System.out.print(matrix_to_solve[row][i]+ " ");			
+		}System.out.print(" | "+matrix_to_solve_RHS[row]+"\n");	
+	}
+	static void print_column(int column) {
+		System.out.print("COLUMN:"+column+"->");
+		for(int i=0;i<matrixSize[1];i++) {
+			System.out.print(matrix_to_solve[column][i]+ " ");			
+		}System.out.print(" | "+matrix_to_solve_RHS[column]+"\n");	
+	}
+	static void print_matrix_to_solve() {
+		
+		for(int r=0;r<matrixSize[0];r++) {
+			System.out.print("R"+r+":");
+			for(int c=0;c<matrixSize[1];c++) {
+				System.out.printf("%.2f  ",matrix_to_solve[r][c]);
+			}System.out.println(" | "+matrix_to_solve_RHS[r]);	
+		}
+		
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
