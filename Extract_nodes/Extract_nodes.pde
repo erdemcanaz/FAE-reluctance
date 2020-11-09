@@ -13,7 +13,7 @@ void setup(){
 
 void draw(){
   
-  extractNodes(150,20,20);
+  extractNodes(20,10,10);
   
 }
 
@@ -22,10 +22,10 @@ int nodeCounter=0;
 boolean allIsExtracted= false;
 
 boolean extractNodes(int numberOfNodesToExtract, int dx, int dy){
-  if(lastCord[0]>500){lastCord[0]=0; lastCord[1]+=dy;}
-  if(lastCord[1]>500){ if(!allIsExtracted){println("finished, number of nodes=",nodeCounter, "estimated mesh memory requirement =",pow(nodeCounter,2)*64.0/pow(1023,2), "MB");allIsExtracted=true; writer.flush(); writer.close();}  return false;}
+  if(lastCord[0]>495){lastCord[0]=0; lastCord[1]+=dy;}
+  if(lastCord[1]>495){ if(!allIsExtracted){println("finished, number of nodes=",nodeCounter, "estimated mesh memory requirement =",pow(nodeCounter,2)*64.0/pow(1023,2), "MB");allIsExtracted=true; writer.flush(); writer.close();}  return false;}
   
-  strokeWeight(2);
+  strokeWeight(10);
   
   
   for(int i=0;i<numberOfNodesToExtract;i++){    
