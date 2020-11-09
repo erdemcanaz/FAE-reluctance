@@ -1,0 +1,8 @@
+float log_scale(float x,float y){
+  if(x>y)x=y;
+  float rate=x/y;
+  float logic_percentage=(log(rate*pow(10,4)) / log(10))/4;
+  if(logic_percentage>=0 && logic_percentage<=1)return logic_percentage;
+  else return 0;
+  
+}
