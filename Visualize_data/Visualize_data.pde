@@ -16,14 +16,19 @@ void setup() {
 
   size(1100, 500); 
   background(255);
-
-  lines = loadStrings("DATA_TEXT_6989.txt");
+  strokeWeight(5);
+  for(int i=0;i<500;i+=5){
+    int c[]=getColorOnScale(i/500.0);
+    stroke(c[0],c[1],c[2]);
+    point(1050,500-i);
+  }
+  lines = loadStrings("resistorsInSeries1.txt");
   cordinates=new int[lines.length][2];
   currents= new float[lines.length][4];
   voltages = new float[lines.length];
   resistances= new String[lines.length];  
   types= new String[lines.length]; 
-
+  
   for (int i = 0; i < lines.length; i++) {
     String d[]= lines[i].split(":");       
     resistances[i]=d[1];
@@ -52,7 +57,12 @@ void draw() {
  for(int i=0;i<lines.length;i++){
      int c[]=getColorOnScale( log_scale(calculate_node_current_POSITIVE(i),MAX_ABSOLUTE_CURRENT,GRAPH_COLOR_SCALE));
      stroke(c[0],c[1],c[2]);
-     point(cordinates[i][0],cordinates[i][1]);
+     point(cordinates[i][0],cordinates[i][1]);    
+  }
+  for(int i=0;i<lines.length;i++){
+     int c[]=getColorOnScale( log_scale(voltages[i],5,GRAPH_COLOR_SCALE));
+     stroke(c[0],c[1],c[2]);
+     point(500+cordinates[i][0],cordinates[i][1]);
     
   }
 }

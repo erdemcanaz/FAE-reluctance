@@ -1,0 +1,14 @@
+1) 500*500 pixellik bi alana paintten çizim yapılır
+	gri(127,127,127): out of boundary
+	kırmızı(255,0,0): Voltage Source
+	mavi(0,0,255): ground
+	beyaz(255): hava (high resistance)
+	siyah(0): demir (low resistance)
+
+2) çözünürlük girilir(dx,dy) bu aşamada strokeWeight in dx-dy den küçük olduğuna emin ol
+3) nodeExtract datayı text haline getirir
+4) eclipsedeki java kodu bu datayı alır işler çözer ve görsel hale getirilebilir hale getirir
+	dx,dy ayarı girilir
+	hava ve demirin direnci girilir
+	voltaj source un voltajı girilir
+5)görsel hale getircek koda doğrudan text atılır ( text adını girmeyi unutma)
