@@ -5,16 +5,15 @@ void setup(){
   size(500,500);
   M1_0 = loadImage("M1_0.png");
   writer = createWriter("pointData.txt");
+ 
   
   image(M1_0,0,0);
   
 }
 
-
-void draw(){
-  
-  extractNodes(20,10,10);
-  
+boolean a=true;
+void draw(){  
+  extractNodes(1,20,20);  
 }
 
 int lastCord[]={0,0};
