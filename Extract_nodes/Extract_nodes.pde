@@ -3,7 +3,7 @@ PrintWriter writer;
 
 void setup(){
   size(500,500);
-  M1_0 = loadImage("M1_0.png");
+  M1_0 = loadImage("angle180.png");
   writer = createWriter("pointData.txt");
  
   
@@ -13,7 +13,7 @@ void setup(){
 
 boolean a=true;
 void draw(){  
-  extractNodes(1,20,20);  
+  extractNodes(100,5,5);  
 }
 
 int lastCord[]={0,0};
@@ -24,7 +24,7 @@ boolean extractNodes(int numberOfNodesToExtract, int dx, int dy){
   if(lastCord[0]>495){lastCord[0]=0; lastCord[1]+=dy;}
   if(lastCord[1]>495){ if(!allIsExtracted){println("finished, number of nodes=",nodeCounter, "estimated mesh memory requirement =",pow(nodeCounter,2)*64.0/pow(1023,2), "MB");allIsExtracted=true; writer.flush(); writer.close();}  return false;}
   
-  strokeWeight(10);
+  strokeWeight(3);
   
   
   for(int i=0;i<numberOfNodesToExtract;i++){    
