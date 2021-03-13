@@ -1,3 +1,4 @@
+YOUTUBE: https://youtu.be/8dPrF46l4rE
 1) 500*500 pixellik bi alana paintten çizim yapılır
 	gri(127,127,127): out of boundary
 	kırmızı(255,0,0): Voltage Source
